@@ -60,8 +60,13 @@ def wind_speed_color(kn):
     return "#ef4444"
 
 
+_forecast_cache = {}
+
 def fetch_forecast(lat, lon):
     import time
+    cache_key = (lat, lon)
+    if cache_key in _forecast_cache:
+        return _forecast_cache[cache_key]
     params = {
         "latitude": lat,
         "longitude": lon,
@@ -78,7 +83,9 @@ def fetch_forecast(lat, lon):
                 timeout=60,
             )
             resp.raise_for_status()
-            return resp.json()
+            result = resp.json()
+            _forecast_cache[cache_key] = result
+            return result
         except requests.exceptions.RequestException as e:
             if attempt == 4:
                 raise
@@ -404,18 +411,26 @@ def send_email(html_content):
 
 
 if __name__ == "__main__":
-    import argparse
+    import argparse, pathlib
     parser = argparse.ArgumentParser()
-    parser.add_argument("--save-html", metavar="FILE", help="Save forecast HTML to file (web mode — always includes all spots)")
+    parser.add_argument("--save-html", metavar="FILE", help="Save web forecast HTML to file")
+    parser.add_argument("--send-email", action="store_true", help="Also send email (used together with --save-html to avoid double API calls)")
     args = parser.parse_args()
 
     try:
         if args.save_html:
-            html, _ = build_html(for_web=True)
-            import pathlib
+            # Web mode: always generate full HTML for all spots
+            web_html, has_conditions = build_html(for_web=True)
             pathlib.Path(args.save_html).parent.mkdir(parents=True, exist_ok=True)
-            pathlib.Path(args.save_html).write_text(html, encoding="utf-8")
+            pathlib.Path(args.save_html).write_text(web_html, encoding="utf-8")
             print(f"✅ Saved to {args.save_html}")
+            if args.send_email:
+                # Reuse the same run's email HTML (email mode filters to valid spots only)
+                email_html, has_conditions = build_html(for_web=False)
+                if not has_conditions:
+                    print("⏭ No qualifying conditions today — email skipped.")
+                else:
+                    send_email(email_html)
         else:
             html, has_conditions = build_html(for_web=False)
             if not has_conditions:

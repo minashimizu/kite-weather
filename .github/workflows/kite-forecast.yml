@@ -34,12 +34,12 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Generate web forecast page
+      - name: Generate forecast (web + email)
         env:
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           RECIPIENTS: ${{ secrets.RECIPIENTS }}
-        run: python kite_weather.py --save-html _site/index.html
+        run: python kite_weather.py --save-html _site/index.html --send-email
 
       - name: Delete old Pages artifacts
         uses: actions/github-script@v7
@@ -68,10 +68,3 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Send email forecast
-        continue-on-error: true
-        env:
-          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
-          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          RECIPIENTS: ${{ secrets.RECIPIENTS }}
-        run: python kite_weather.py
