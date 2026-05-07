@@ -14,7 +14,6 @@ SPOTS = [
     {"name": "Miura Beach", "lat": 35.136, "lon": 139.617, "beach_facing": 190},
     {"name": "Futtsu Cape", "lat": 35.302, "lon": 139.822, "beach_facing": 270},
     {"name": "Numazu",      "lat": 35.070, "lon": 138.870, "beach_facing": 185},
-    {"name": "Fujikawa",    "lat": 35.150, "lon": 138.670, "beach_facing": 180},
 ]
 
 WIND_MIN            = 12   # knots
@@ -368,15 +367,22 @@ def build_html(for_web=False):
       <span style="color:#ef4444;">■ 29+ kn</span>
     </div>"""
 
-    web_meta = '<meta name="viewport" content="width=device-width,initial-scale=1"><meta charset="utf-8">' if for_web else ""
+    web_meta = (
+        '<meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'
+        '<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">'
+        '<meta http-equiv="Pragma" content="no-cache">'
+        '<meta http-equiv="Expires" content="0">'
+    ) if for_web else ""
     html = f"""
     <html><head>{web_meta}</head>
     <body style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:700px;margin:0 auto;padding:20px;color:#2c3e50;">
       <div style="background:linear-gradient(135deg,#0077cc,#00b4d8);padding:20px 24px;border-radius:10px;margin-bottom:20px;">
         <h1 style="color:white;margin:0;font-size:22px;">🪁 Kite Surfing Wind Forecast</h1>
         <p style="color:#d6eaf8;margin:6px 0 0;font-size:13px;">
-          As of {now.strftime("%Y/%m/%d %H:%M")} JST &nbsp;/&nbsp; {target_dates[0]} – {target_dates[2]}<br>
-          Riding window: 09:00–18:00 &nbsp;|&nbsp; Wind: {WIND_MIN}–{WIND_MAX} kn &nbsp;|&nbsp; Max gust: base +{GUST_SPREAD_MAX} kn &nbsp;|&nbsp; Min window: {MIN_CONSECUTIVE_HRS} hrs
+          Forecast: {target_dates[0]} – {target_dates[2]}<br>
+          Riding window: 09:00–18:00 &nbsp;|&nbsp; Wind: {WIND_MIN}–{WIND_MAX} kn &nbsp;|&nbsp; Max gust: base +{GUST_SPREAD_MAX} kn &nbsp;|&nbsp; Min window: {MIN_CONSECUTIVE_HRS} hrs<br>
+          <span style="font-size:11px;opacity:0.8;">Last updated: {now.strftime("%Y/%m/%d %H:%M")} JST</span>
         </p>
       </div>
       {summary_table}
