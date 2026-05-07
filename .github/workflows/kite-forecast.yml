@@ -3,10 +3,10 @@ name: Kite Weather Forecast
 on:
   schedule:
     - cron: '0 12 * * *'  # 21:00 JST (12:00 UTC)
-  workflow_dispatch:       # 手動実行ボタンも有効化
+  workflow_dispatch:
 
 permissions:
-  contents: write  # gh-pagesブランチへのpushに必要
+  contents: write
 
 jobs:
   send-forecast:
@@ -30,13 +30,15 @@ jobs:
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           RECIPIENTS: ${{ secrets.RECIPIENTS }}
-        run: python kite_weather.py --save-html _site/index.html
+        run: python kite_weather.py --save-html docs/index.html
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./_site
+      - name: Commit and push forecast page
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/index.html
+          git diff --cached --quiet || git commit -m "Update forecast page"
+          git push
 
       - name: Send email forecast
         env:
