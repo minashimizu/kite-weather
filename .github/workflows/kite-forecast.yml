@@ -1,0 +1,29 @@
+name: Kite Weather Forecast
+
+on:
+  schedule:
+    - cron: '0 12 * * *'  # 21:00 JST (12:00 UTC)
+  workflow_dispatch:       # 手動実行ボタンも有効化
+
+jobs:
+  send-forecast:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run kite weather script
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python kite_weather.py
