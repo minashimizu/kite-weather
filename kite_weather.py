@@ -70,19 +70,19 @@ def fetch_forecast(lat, lon):
         "timezone": "Asia/Tokyo",
         "forecast_days": 4,
     }
-    for attempt in range(3):
+    for attempt in range(5):
         try:
             resp = requests.get(
                 "https://api.open-meteo.com/v1/forecast",
                 params=params,
-                timeout=30,
+                timeout=60,
             )
             resp.raise_for_status()
             return resp.json()
         except requests.exceptions.RequestException as e:
-            if attempt == 2:
+            if attempt == 4:
                 raise
-            time.sleep(5)
+            time.sleep(15)
     return None
 
 
