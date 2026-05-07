@@ -157,7 +157,7 @@ def get_window_range(valid_times):
     return None
 
 
-def build_html():
+def build_html(for_web=False):
     now = datetime.now(JST)
     target_dates = [(now + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(1, 4)]
 
@@ -208,10 +208,11 @@ def build_html():
             "has_valid": spot_has_valid,
         })
 
-    # Only keep spots that have at least one valid day
+    # Email mode: only spots with valid days; web mode: all spots
     valid_spots = [sd for sd in all_spot_data if sd["has_valid"]]
-    if not valid_spots:
+    if not for_web and not valid_spots:
         return None, False
+    display_spots = all_spot_data if for_web else valid_spots
 
     # ── Summary table ─────────────────────────────────────────────────────────
     day_headers = ""
@@ -222,7 +223,7 @@ def build_html():
         day_headers += f'<th style="padding:8px 14px;text-align:center;">{date[5:7]}/{date[8:10]}<br><span style="font-weight:normal;font-size:11px;">{wd}</span></th>'
 
     summary_rows = ""
-    for sd in valid_spots:
+    for sd in display_spots:
         cells = f'<td style="padding:8px 12px;font-weight:bold;">{sd["spot"]["name"]}</td>'
         for day in sd["days"]:
             if day["day_valid"] and day["window_range"]:
@@ -247,7 +248,7 @@ def build_html():
 
     # ── Detailed blocks ───────────────────────────────────────────────────────
     detail_blocks = []
-    for sd in valid_spots:
+    for sd in display_spots:
         spot     = sd["spot"]
         day_html = []
 
@@ -351,8 +352,9 @@ def build_html():
       <span style="color:#ef4444;">■ 29+ kn</span>
     </div>"""
 
+    web_meta = '<meta name="viewport" content="width=device-width,initial-scale=1"><meta charset="utf-8">' if for_web else ""
     html = f"""
-    <html>
+    <html><head>{web_meta}</head>
     <body style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:700px;margin:0 auto;padding:20px;color:#2c3e50;">
       <div style="background:linear-gradient(135deg,#0077cc,#00b4d8);padding:20px 24px;border-radius:10px;margin-bottom:20px;">
         <h1 style="color:white;margin:0;font-size:22px;">🪁 Kite Surfing Wind Forecast</h1>
@@ -370,7 +372,7 @@ def build_html():
     </body>
     </html>
     """
-    return html, True
+    return html, bool(valid_spots)
 
 
 def send_email(html_content):
@@ -393,12 +395,24 @@ def send_email(html_content):
 
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--save-html", metavar="FILE", help="Save forecast HTML to file (web mode — always includes all spots)")
+    args = parser.parse_args()
+
     try:
-        html, has_conditions = build_html()
-        if not has_conditions:
-            print("⏭ No qualifying conditions today — email skipped.")
-            sys.exit(0)
-        send_email(html)
+        if args.save_html:
+            html, _ = build_html(for_web=True)
+            import pathlib
+            pathlib.Path(args.save_html).parent.mkdir(parents=True, exist_ok=True)
+            pathlib.Path(args.save_html).write_text(html, encoding="utf-8")
+            print(f"✅ Saved to {args.save_html}")
+        else:
+            html, has_conditions = build_html(for_web=False)
+            if not has_conditions:
+                print("⏭ No qualifying conditions today — email skipped.")
+                sys.exit(0)
+            send_email(html)
     except KeyError as e:
         print(f"❌ Missing environment variable: {e}")
         sys.exit(1)

@@ -5,6 +5,9 @@ on:
     - cron: '0 12 * * *'  # 21:00 JST (12:00 UTC)
   workflow_dispatch:       # 手動実行ボタンも有効化
 
+permissions:
+  contents: write  # gh-pagesブランチへのpushに必要
+
 jobs:
   send-forecast:
     runs-on: ubuntu-latest
@@ -22,7 +25,20 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run kite weather script
+      - name: Generate web forecast page
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENTS: ${{ secrets.RECIPIENTS }}
+        run: python kite_weather.py --save-html _site/index.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+
+      - name: Send email forecast
         env:
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
