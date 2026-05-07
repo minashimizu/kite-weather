@@ -376,7 +376,7 @@ def build_html():
 def send_email(html_content):
     sender     = os.environ["GMAIL_ADDRESS"]
     password   = os.environ["GMAIL_APP_PASSWORD"]
-    recipients = ["mina.shimizu76@gmail.com", "alexander.kinner87@gmail.com"]
+    recipients = [r.strip() for r in os.environ["RECIPIENTS"].split(",")]
 
     now = datetime.now(JST)
     msg = MIMEMultipart("alternative")
