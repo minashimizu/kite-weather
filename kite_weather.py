@@ -61,20 +61,29 @@ def wind_speed_color(kn):
 
 
 def fetch_forecast(lat, lon):
-    resp = requests.get(
-        "https://api.open-meteo.com/v1/forecast",
-        params={
-            "latitude": lat,
-            "longitude": lon,
-            "hourly": "wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code",
-            "wind_speed_unit": "kn",
-            "timezone": "Asia/Tokyo",
-            "forecast_days": 4,
-        },
-        timeout=10,
-    )
-    resp.raise_for_status()
-    return resp.json()
+    import time
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "hourly": "wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code",
+        "wind_speed_unit": "kn",
+        "timezone": "Asia/Tokyo",
+        "forecast_days": 4,
+    }
+    for attempt in range(3):
+        try:
+            resp = requests.get(
+                "https://api.open-meteo.com/v1/forecast",
+                params=params,
+                timeout=30,
+            )
+            resp.raise_for_status()
+            return resp.json()
+        except requests.exceptions.RequestException as e:
+            if attempt == 2:
+                raise
+            time.sleep(5)
+    return None
 
 
 def kite_wind_dir(wind_deg, beach_facing_deg):
