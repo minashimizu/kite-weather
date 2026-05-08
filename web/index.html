@@ -150,7 +150,7 @@
       hourly: "wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code",
       wind_speed_unit: "kn", timezone: "Asia/Tokyo", forecast_days: 4
     });
-    const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, { cache: 'no-store' });
     return res.json();
   }
 
