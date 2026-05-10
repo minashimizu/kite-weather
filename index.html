@@ -33,7 +33,8 @@
   const SPOTS = [
     { name: "Miura Beach", lat: 35.136, lon: 139.617, beachFacing: 190 },
     { name: "Futtsu Cape", lat: 35.302, lon: 139.822, beachFacing: 270 },
-    { name: "Numazu",      lat: 35.070, lon: 138.870, beachFacing: 185 },
+    { name: "Numazu",       lat: 35.070, lon: 138.870, beachFacing: 185 },
+    { name: "Hasaki Beach", lat: 35.733, lon: 140.833, beachFacing: 90 },
   ];
 
   const WIND_MIN = 12, WIND_MAX = 25, GUST_SPREAD_MAX = 12;
@@ -210,9 +211,6 @@
 
   async function render() {
     const dates = getDates();
-    const now = new Date();
-    const jst = new Date(now.getTime() + 9 * 3600000);
-    const updatedStr = jst.toISOString().slice(0, 16).replace('T', ' ') + ' JST';
 
     let spotDays = [];
     for (const spot of SPOTS) {
@@ -252,6 +250,10 @@
 
       spotDays.push({ spot, days });
     }
+
+    const now = new Date();
+    const jst = new Date(now.getTime() + 9 * 3600000);
+    const updatedStr = jst.toISOString().slice(0, 16).replace('T', ' ') + ' JST';
 
     const legend = `<div class="legend">
       <strong>Row highlight:</strong>
