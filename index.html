@@ -210,6 +210,9 @@
 
   async function render() {
     const dates = getDates();
+    const now = new Date();
+    const jst = new Date(now.getTime() + 9 * 3600000);
+    const updatedStr = jst.toISOString().slice(0, 16).replace('T', ' ') + ' JST';
 
     let spotDays = [];
     for (const spot of SPOTS) {
@@ -249,10 +252,6 @@
 
       spotDays.push({ spot, days });
     }
-
-    const now = new Date();
-    const jst = new Date(now.getTime() + 9 * 3600000);
-    const updatedStr = jst.toISOString().slice(0, 16).replace('T', ' ') + ' JST';
 
     const legend = `<div class="legend">
       <strong>Row highlight:</strong>
