@@ -14,7 +14,8 @@ SPOTS = [
     {"name": "Miura Beach", "lat": 35.136, "lon": 139.617, "beach_facing": 190},
     {"name": "Futtsu Cape", "lat": 35.302, "lon": 139.822, "beach_facing": 270},
     {"name": "Numazu",       "lat": 35.070, "lon": 138.870, "beach_facing": 185},
-    {"name": "Hasaki Beach", "lat": 35.733, "lon": 140.833, "beach_facing": 90},
+    {"name": "Hasaki Beach",   "lat": 35.733, "lon": 140.833, "beach_facing": 90},
+    {"name": "Motosuka Beach", "lat": 35.720, "lon": 140.728, "beach_facing": 180},
 ]
 
 WIND_MIN            = 12   # knots
